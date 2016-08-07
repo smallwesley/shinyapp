@@ -12,10 +12,7 @@ This tool allows use to quickly investigate the exponential distribution and com
 ## To Use this Tool:
 
 This tool has a basic interface to allowing use to specify the parameters of the exponential distribution.  
-
 You can modify the the parameters entered into the exponential formula and investigate the distribution of a large sampling of averages of groups (no of simulations). This tool has reactive interface so once your modify the parameters in the left panel, you will see some modifications to the summary view in the primary panel.
-
-STEPS:
 
 1. Use the slide to change the lambda rate used in the calculations.
 
@@ -23,7 +20,7 @@ STEPS:
 
 3. Modify the number of simulations that will be calculated for the primary simulation.
 
-4. In the main panel on the right side of the interface, toggle between the tabs/panes to see different summaries, plots and charts about the exponential distribution in question.
+4. In the main panel on the right, toggle between the tabs/panes to see different results, plots and charts about the exponential distribution.
 
 * * *
 
@@ -40,5 +37,4 @@ STEPS:
 | Theoretical Mean | expDistMean | getExpDistMean(lambda) = 5 | |
 
 Param-Note 1: The expontential distribution can be simulated with this function *getExpDist*, where *lambda* is a rate parameter. We will pass in the number of exponentials we want to be calculated.
-
 

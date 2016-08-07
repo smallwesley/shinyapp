@@ -4,7 +4,7 @@ shinyUI(
       h1("Exponential Distribution Simulations (EDS)")),
     sidebarLayout(
       sidebarPanel(
-        "This EDS Tool investigates the exponential distribution with comparison to Central Limit Theorem (CLT). With the Central Limit Theorem, the rule states that the distribution of average of IID (Independant & Identically Distributed) variables, (when properly normalized), becomes that of a standard normal distribution.  This is more evident as the sample size increases.",
+        "This EDS Tool investigates the exponential distribution with comparison to Central Limit Theorem (CLT). ",
         hr(),
         HTML('<a href="help.html" target="_blank">Click here for detailed Help</a>'),
         hr(),
@@ -38,7 +38,24 @@ shinyUI(
             "Quantile Plot Visualization",
             p("The Quantile Plot of the distribution of exponential random variables (non-scaled). When the plotted averages resemble a staight line, it demonstrates the sample population is normally distributed."),
             plotOutput("graphExpDistQuantile")
-          )          
+          ),
+          tabPanel(
+            "Sampling Distribution",
+            p("For a sampling distribution to be normal it should statify attributes of a standard normal:"),
+            tags$ul(
+              tags$li("Where 68% distribution lies within 1 standard deviation from it's distribution mean."),
+              tags$li("Secondly, 97% lies within 2 standard deviations awat from from distribution mean."),
+              tags$li("Lastly, 99% lies within 3 standard deviations from the distribution mean.")
+            ),
+            hr(),
+            h4("The sampling population characteristics:"),
+            verbatimTextOutput("samp_mu"),
+            verbatimTextOutput("samp_sd"),
+            verbatimTextOutput("samp_len"),
+            hr(),
+            h5("The first field indicates the standard deviation value from mean."),
+            tableOutput("tableSampDist")
+          ) 
         )
       )
     )

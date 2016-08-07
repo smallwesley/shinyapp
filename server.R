@@ -3,6 +3,8 @@ library(ggplot2)
 # ---------------------------------------------------
 # AUXILLARY FUNCTIONS: FOR COMPUTING EXPONENTIAL DISTRIBUTION 
 # ---------------------------------------------------
+
+# COMPUTE: 
 getExpDist <- function(n, lambda) rexp(n,lambda)
 getExpDistMean <- function(lambda) 1/lambda
 getExpDistStdDev <- function(lambda) 1/lambda
@@ -11,7 +13,21 @@ getSimulationExpDistMeansDataFrame <- function(n, lambda, nosim) {
   for (i in 1 : nosim) output = c(output, mean(getExpDist(n=n,lambda=lambda)))
   data.frame(x_axis = output)
 }
+
+# Function for PLOT Breaks on x-axis
 scaleStepBreaks <- function(mean_mu,distance) ((mean_mu-distance):(mean_mu+distance))
+
+# Calculate Standard Deviation Endpoints; Interval based on distance from the mean
+getStdDevSampleInterval <- function(g, mu, stddev) c(mu - stddev * g, mu + stddev * g)
+
+# For a list of results, calculate the precentage of results that lie within the standard dev.
+calculateSamplePercentageWithinStdDevInterval <- function(g, list, mu, stddev, tLen) {
+  sdGroup <- getStdDevSampleInterval(g, mu, stddev)
+  validSdGroup <- NULL
+  for ( i in 1:length(list) ) 
+    if (list[i] >= sdGroup[1] & list[i] <= sdGroup[2]) validSdGroup <- c(validSdGroup, list[[i]])
+  round(length(validSdGroup)/tLen, 2)
+}
 
 # ---------------------------------------------------
 # SHINY SERVER IO
@@ -29,6 +45,7 @@ shinyServer(
       
       simulationExpDistMeansDF <-  reactive({ getSimulationExpDistMeansDataFrame(input$paramN,input$paramLambda,input$paramNoSim) }) 
       simulationExpDistMean <-  reactive({ mean(simulationExpDistMeansDF()$x_axis) })
+      simulationExpDistSD <-  reactive({ sd(simulationExpDistMeansDF()$x_axis) })
       simulationExpDistVariance <-  reactive({ var(simulationExpDistMeansDF()$x_axis) })
     
       qnormY <- reactive({ (simulationExpDistMeansDF()$x_axis - expDistMean()) / (expDistSD()/sqrt(input$paramN)) }) 
@@ -40,15 +57,31 @@ shinyServer(
       output$copyExpDistMean <- renderPrint({ paste0("The Exponential Distribution Mean is ", round(expDistMean(),4)) })
       output$copyExpDistSD <- renderPrint({ paste0("The Standard Deviation for this Exponential Distribution is ", round(expDistSD(),4)) })
 
+      # MEANS TABLE
       listMeans <- reactive({ round( c(simulationExpDistMean(),expDistMean()), 4) })
       rowMeans <- c("Mean from the simulation samples","Theoretical mean")
       meansDF <- reactive({ data.frame("MEAN"=listMeans(), row.names=rowMeans) })
       output$tableMeans <- renderTable( meansDF() )
       
+      # VARIANCES TABLE
       listVariances <- reactive({ round( c(simulationExpDistVariance(),expDistVariance()), 4) })
       rowVariances <- c("Variance from the simulation samples ","Theoretical variance")
       variancesDF <- reactive({ data.frame("VARIANCE"=listVariances(), row.names=rowVariances) })
       output$tableVariances <- renderTable( variancesDF() )
+      
+      # SAMPLING DISTRIBUTION TABLE 
+      samp <- reactive({ simulationExpDistMeansDF()$x_axis })
+      lenSamp <- reactive({ length(samp()) })
+      output$samp_len <- renderPrint({ paste0("Length = ",lenSamp()) })
+      samp_mu <- reactive({ mean(samp()) })
+      output$samp_mu <- renderPrint({ paste0("Mean = ",samp_mu()) })
+      samp_sd <- reactive({ sd(samp()) })
+      output$samp_sd <- renderPrint({ paste0("Std-Dev = ",samp_sd(), " (Standard Deviation)") })
+      listSampDistIntv <- reactive({ c( paste(as.character(getStdDevSampleInterval(1, samp_mu(),samp_sd())), collapse=", "), paste(as.character(getStdDevSampleInterval(2, samp_mu(),samp_sd())), collapse=", "), paste(as.character(getStdDevSampleInterval(3, samp_mu(),samp_sd())), collapse=", ")) })
+      listCoveragePercentage <- reactive({ c(calculateSamplePercentageWithinStdDevInterval(1, samp(), samp_mu(),samp_sd(), lenSamp()), calculateSamplePercentageWithinStdDevInterval(2, samp(), samp_mu(),samp_sd(), lenSamp()),calculateSamplePercentageWithinStdDevInterval(3, samp(), samp_mu(),samp_sd(), lenSamp())) })
+      rowSampDist <- c("1","2","3")
+      sampDistDF <- reactive({ data.frame("Sampling Distrbution Interval"=listSampDistIntv(), "Coverage Percentage"=listCoveragePercentage() ,row.names=rowSampDist) })
+      output$tableSampDist <- renderTable( sampDistDF() )
       
       # PLOT HISTOGRAM 
       output$graphExpHistogram <- renderPlot({

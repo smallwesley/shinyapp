@@ -2,6 +2,6 @@ name: shinyapp
 account: smallwesley
 server: shinyapps.io
 appId: 118781
-bundleId: 525795
+bundleId: 526100
 url: https://smallwesley.shinyapps.io/shinyapp/
-when: 1470541169.66953
+when: 1470590566.61313
